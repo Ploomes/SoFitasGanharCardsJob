@@ -1,0 +1,5 @@
+
+.ploomesdev
+.dockerignore
+.git
+**/appsettings.json

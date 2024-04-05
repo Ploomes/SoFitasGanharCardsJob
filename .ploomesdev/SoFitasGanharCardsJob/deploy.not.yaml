@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: <@ INSTANCE_NAME @>
+  labels:
+    app: <@ INSTANCE_NAME @>
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            kubernetes.io/os: linux
+            type: Standard
+          restartPolicy: OnFailure                                                                  
+          containers:
+          - name: <@ INSTANCE_NAME @>
+            imagePullPolicy: Always
+            image: ploomes.azurecr.io/ploomes/sofitasganharcardsjob:<@ IMAGE_TAG @>
+            env:
+            <@ DATADOG_TRACER_ENVIRONMENT_VARIABLES @>
+            <@ ENVIRONMENT_VARIABLES_FROM_SECRET @>
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            volumeMounts:
+            - name: secrets
+              mountPath: "/secrets"
+              readOnly: true
+          volumes:
+            - name: secrets
+              secret:
+                secretName: <@ SECRET_NAME @>
